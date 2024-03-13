@@ -1,26 +1,17 @@
 package com.example.komunikator.controller;
 
-import com.example.komunikator.domain.Conversation;
-import com.example.komunikator.domain.MyUserDetails;
 import com.example.komunikator.domain.User;
-import com.example.komunikator.repository.ConversationRepo;
 import com.example.komunikator.service.AppService;
 import com.example.komunikator.service.data.Chat;
 import com.example.komunikator.service.data.IdUsername;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.socket.messaging.SessionConnectedEvent;
-
 import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,13 +32,13 @@ public class AppController {
         catch (NullPointerException e){
             System.out.println("Not authorized user");
         }
-        //wiadomość składa się z 3 elementów, loginu odbiorcy, spacji  i treści
-        int space = recipientAndMessage.indexOf(" "); //spacja
+        // message consists of 3 elements: recipient's login, space, and content
+        int space = recipientAndMessage.indexOf(" "); //space
         String sendTo = recipientAndMessage.substring(0,space); //login
-        String message = recipientAndMessage.substring(space+1,recipientAndMessage.length()); //treść
+        String message = recipientAndMessage.substring(space+1,recipientAndMessage.length()); //content
         int conversationId = appService.findConversation(appService.getUserByUsername(sendFrom).getId(),appService.getUserByUsername(sendTo).getId());
-        appService.addMessage(message,appService.getUserByUsername(sendFrom).getId(),conversationId); //wysłanie do bazy danych
-        simpMessagingTemplate.convertAndSendToUser(sendTo, "/queue/messages", sendFrom+": "+message); //wysłanie przez WebSocket do odbiorcy
+        appService.addMessage(message,appService.getUserByUsername(sendFrom).getId(),conversationId); //save in DB
+        simpMessagingTemplate.convertAndSendToUser(sendTo, "/queue/messages", sendFrom+": "+message); //send by WebSocket to recipient
     }
 
     @PostMapping("/register")
@@ -58,13 +49,13 @@ public class AppController {
     public List<IdUsername> usersList(){
         List<User> users = appService.getAllUsers();
         String username = appService.getPrincipalUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        return users.stream()  //uniemożliwienie pisania wiadomości do samego siebie
+        return users.stream()  //block sending messages to yourself
                 .filter(user -> !user.getUsername().equals(username))
-                .map(user -> new IdUsername(user.getId(),user.getUsername()))//zmapowanie na obiekt nie zawierający pól z wrażliwymi danymi
+                .map(user -> new IdUsername(user.getId(),user.getUsername()))//DTO
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/conversation/{id}")//id to id użytkownika z którym prowadzimy konwersację
+    @GetMapping("/conversation/{id}")//{id} is recipient's id
     public ResponseEntity<Chat> ChatTo(@PathVariable String id){
         String username = appService.getPrincipalUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         return ResponseEntity.ok(new Chat(appService.sortMessagesByUsername(appService.getConversationById(Integer.parseInt(id))),
@@ -72,7 +63,7 @@ public class AppController {
                 username));
     }
 
-    @GetMapping("user/{id}")//id jednego z użytkowników konwersaji, id zalogowanego użytkownika inicjującego konwersację jest pobierane z principal'a
+    @GetMapping("user/{id}")//id of one of the conversation users; the ID of the logged-in user initiating the conversation is retrieved from the principal
     public int getConversationId(@PathVariable String id){
         String username = appService.getPrincipalUsername(SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         return appService.startConversation(appService.getUserByUsername(username).getId(),Integer.parseInt(id));

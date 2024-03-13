@@ -27,7 +27,7 @@ public class UserInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel){
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        if (StompCommand.CONNECT.equals(accessor.getCommand())) {//weryfikacja tokenu JWT tylko przy nawiązywaniu połączenia
+        if (StompCommand.CONNECT.equals(accessor.getCommand())) {//verifies JWT token during connection
             Map headers = (LinkedMultiValueMap)message.getHeaders().get(SimpMessageHeaderAccessor.NATIVE_HEADERS);
             ArrayList tokenList = (ArrayList)headers.get("token");
             String token = tokenList.get(0).toString();

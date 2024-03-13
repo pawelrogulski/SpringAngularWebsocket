@@ -1,34 +1,21 @@
 package com.example.komunikator.controller;
 
-import com.example.komunikator.KomunikatorApplication;
-import com.example.komunikator.domain.Conversation;
 import com.example.komunikator.domain.User;
-import com.example.komunikator.repository.ConversationRepo;
-import com.example.komunikator.repository.UserRepo;
 import com.example.komunikator.service.AppService;
 import com.example.komunikator.service.data.IdUsername;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.annotation.Before;
-import org.jose4j.jwk.Use;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -36,8 +23,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest

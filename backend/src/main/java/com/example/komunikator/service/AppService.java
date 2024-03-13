@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityExistsException;
 import javax.transaction.Transactional;
-import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,12 +24,12 @@ public class AppService {
 
 
     public Role addRole(String role){
-        String[] possibleRoles = {"ROLE_USER"}; //lista wszystkich zaimplementowanych w aplikacji ról
+        String[] possibleRoles = {"ROLE_USER"}; //list of all possible roles
         if(!Arrays.asList(possibleRoles).contains(role)){
-            throw new IllegalStateException("Niezaimplementowana rola");
+            throw new IllegalStateException("Role not implemented");
         }
         Role foundRole = roleRepository.findByName(role);
-        if(foundRole==null){ //jeśli zaimplementowanej roli nie ma jeszcze w bazie danych
+        if(foundRole==null){ //add to DB if not exists yet
             Role newRole = new Role();
             newRole.setName(role);
             roleRepository.save(newRole);
@@ -49,7 +48,7 @@ public class AppService {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         Collection<Role> defaultRole = new ArrayList<>();
-        defaultRole.add(addRole("ROLE_USER")); //domyślnie użytkownik tworzony jest jedynie z rolą "user"
+        defaultRole.add(addRole("ROLE_USER")); //new user is created with default role USER
         user.setRoles(defaultRole);
         return userRepository.save(user);
     }
@@ -78,7 +77,7 @@ public class AppService {
             throw new IllegalArgumentException("Użytkownik nie może nawiązać konwersacji sam ze sobą");
         }
         int conversationId = findConversation(user1id, user2id);
-        if(conversationId==-1){ //jeśli użytkownicy nie mają między sobą istniejącej konwersacji metoda tworzy ją i zwraca jej id
+        if(conversationId==-1){ //if users don't have conversation then method creates one and returns it id
             Collection<User> users = new ArrayList<>();
             users.add(userRepository.findById(user1id).get());
             users.add(userRepository.findById(user2id).get());
@@ -87,11 +86,11 @@ public class AppService {
             conversationRepository.save(conversation);
             return conversation.getId();
         }
-        return conversationId; //jeśli konwersacja istnieje metoda zwraca jej id
+        return conversationId; //if conversation already exists then return it id
     }
 
     @Transactional
-    public int findConversation(int user1id, int user2id){ //zwraca id konwersacji dwóch użytkowników
+    public int findConversation(int user1id, int user2id){ //return id of conversation between two users
         List<Conversation> conversations = conversationRepository.findConversationByUserId(new int[]{user1id, user2id});
         if(conversations.isEmpty()){
             return -1;
@@ -105,11 +104,11 @@ public class AppService {
         return conversationRepository.findById(id).get();
     }
 
-    public List<String> sortMessagesByUsername(Conversation conversation){ // zwraca chronologicznie wiadomości z danej konwersacji
+    public List<String> sortMessagesByUsername(Conversation conversation){ // return in chronological order of messages of two users
         List<String> messages = new ArrayList<>();
         if(conversation.getMessages()!=null){
             for(Message message : conversation.getMessages()){
-                //dodaje do wiadomości prefix z loginem użytkownika, który wysłał daną wiadomość
+                //adds username prefix to messages
                 messages.add(getUserById(message.getFromId()).getUsername()+": "+message.getText());
             }
         }

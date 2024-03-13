@@ -1,11 +1,9 @@
 package com.example.komunikator.security.jwt;
 
 import com.example.komunikator.domain.MyUserDetails;
-import com.example.komunikator.service.MyUserDetailsService;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
