@@ -1,6 +1,5 @@
 package com.example.komunikator.service.data;
 
-import com.example.komunikator.domain.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

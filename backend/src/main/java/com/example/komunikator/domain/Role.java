@@ -16,7 +16,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
-    @JsonIgnore //relacja many-many powodowała stack overflow error, ponieważ JSON serializował użytkownika, który posiadał rolę, która należała do tego użytkownika itd
+    @JsonIgnore //many-to-many relationship caused a stack overflow error because the JSON serialization included a user who possessed a role that belonged to that user, and so on
     @ManyToMany(mappedBy = "roles")
     private Collection<User> users;
 }
